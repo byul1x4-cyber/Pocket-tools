@@ -3,8 +3,16 @@
 휴대폰에서 자주 쓰는 7가지 생활 도구를 한 화면에 모은 **정적 웹앱**입니다.
 사진·PDF·링크가 **서버로 전송되지 않습니다.** 모든 처리는 브라우저(내 폰) 안에서만 이뤄지고, 결과물도 저장 버튼을 누를 때만 기기에 남습니다.
 
-- 배포: <https://byul1x4-cyber.github.io/pocket-tools/>
+- 배포: <https://byul1x4-cyber.github.io/Pocket-tools/> (레포 이름이 `Pocket-tools` 대문자 P라 주소도 대문자입니다)
 - 홈 화면에 추가(iOS Safari → 공유 → 홈 화면에 추가)하면 앱처럼 전체 화면으로 열립니다.
+
+## 업데이트하는 법
+
+```bash
+cd pocket-tools
+git add -A && git commit -m "내용" && git push origin main
+# 1~2분 뒤 https://byul1x4-cyber.github.io/Pocket-tools/ 에 반영
+```
 
 ## 7가지 도구
 
