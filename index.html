@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>샛별 도구함</title>
+<meta name="description" content="EXIF 삭제·모자이크, URL 추적 제거, PDF↔이미지, 이미지 압축, QR 생성, SNS 비율 리사이즈, 워터마크 — 모두 내 폰 안에서만 처리하는 7가지 도구.">
+<meta name="theme-color" content="#5b6cff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="샛별 도구함">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-head">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">🛠️</span>
+    <div>
+      <h1 id="appTitle">샛별 도구함</h1>
+      <p class="brand-sub">자주 쓰는 7가지, 한 화면에서</p>
+    </div>
+  </div>
+</header>
+
+<div class="privacy-bar" id="privacyBar">🔒 모든 작업은 내 폰 안에서만 처리돼요 (서버 전송 없음)</div>
+
+<nav class="tabs" role="tablist" aria-label="도구 선택">
+  <button class="tab is-active" role="tab" id="tab-exif" aria-controls="panel-exif" aria-selected="true" data-tool="exif"><span aria-hidden="true">🪪</span>EXIF·모자이크</button>
+  <button class="tab" role="tab" id="tab-url" aria-controls="panel-url" aria-selected="false" data-tool="url"><span aria-hidden="true">🔗</span>URL 정리</button>
+  <button class="tab" role="tab" id="tab-pdf" aria-controls="panel-pdf" aria-selected="false" data-tool="pdf"><span aria-hidden="true">📄</span>PDF↔이미지</button>
+  <button class="tab" role="tab" id="tab-compress" aria-controls="panel-compress" aria-selected="false" data-tool="compress"><span aria-hidden="true">🗜️</span>압축·변환</button>
+  <button class="tab" role="tab" id="tab-qr" aria-controls="panel-qr" aria-selected="false" data-tool="qr"><span aria-hidden="true">📱</span>QR 만들기</button>
+  <button class="tab" role="tab" id="tab-resize" aria-controls="panel-resize" aria-selected="false" data-tool="resize"><span aria-hidden="true">🖼️</span>SNS 비율</button>
+  <button class="tab" role="tab" id="tab-watermark" aria-controls="panel-watermark" aria-selected="false" data-tool="watermark"><span aria-hidden="true">🏷️</span>워터마크</button>
+</nav>
+
+<main>
+
+  <!-- ① EXIF 삭제 · 모자이크 -->
+  <section class="panel is-active" id="panel-exif" role="tabpanel" aria-labelledby="tab-exif">
+    <div class="panel-head">
+      <h2>🪪 EXIF 삭제 · 모자이크</h2>
+      <p>사진에 숨은 촬영 위치·기기 정보를 지우고, 얼굴이나 계좌번호를 손가락으로 문질러 가려요.</p>
+    </div>
+
+    <div class="card">
+      <label class="drop" for="exifFile">
+        <input type="file" id="exifFile" accept="image/*">
+        <span class="ico" aria-hidden="true">📷</span>
+        <strong>사진 선택</strong>
+        <span>저장할 때 EXIF가 자동으로 완전히 사라져요</span>
+      </label>
+      <p class="hint" id="exifMeta">사진을 고르면 원본에 남아 있던 정보를 먼저 알려 드려요.</p>
+    </div>
+
+    <div class="card hidden" id="exifEditor">
+      <h3>가릴 곳을 문지르세요 <span class="badge" id="exifModeBadge">모자이크</span></h3>
+      <div class="stage" id="exifStage">
+        <canvas id="exifCanvas" aria-label="편집할 사진"></canvas>
+      </div>
+      <div class="seg" id="exifMode" role="group" aria-label="가리기 방식">
+        <button type="button" data-mode="mosaic" class="is-on">모자이크</button>
+        <button type="button" data-mode="blur">블러</button>
+      </div>
+      <div class="slider-row">
+        <span>굵기</span>
+        <input type="range" id="exifBrush" min="10" max="200" value="60" step="2" aria-label="브러시 굵기">
+        <output id="exifBrushOut" for="exifBrush">60</output>
+      </div>
+      <div class="btn-row">
+        <button class="btn line" type="button" id="exifUndo">↩︎ 되돌리기</button>
+        <button class="btn line" type="button" id="exifReset">초기화</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn" type="button" id="exifSavePng">PNG 저장</button>
+        <button class="btn" type="button" id="exifSaveJpg">JPG 저장</button>
+      </div>
+      <p class="hint" id="exifSaveInfo"></p>
+    </div>
+  </section>
+
+  <!-- ② URL 추적 꼬리표 제거 -->
+  <section class="panel" id="panel-url" role="tabpanel" aria-labelledby="tab-url">
+    <div class="panel-head">
+      <h2>🔗 URL 추적 꼬리표 제거</h2>
+      <p>인스타·스레드·쿠팡·네이버·유튜브 링크를 붙여넣으면 뒤에 붙은 추적 꼬리표를 잘라 내요.</p>
+    </div>
+
+    <div class="card">
+      <label class="field">
+        <span class="lbl">링크 붙여넣기 <b>(여러 줄도 한 번에)</b></span>
+        <textarea id="urlInput" placeholder="https://www.instagram.com/p/XXXX/?igsh=abc123&#10;https://www.coupang.com/vp/products/1234567?itemId=99&amp;vendorItemId=88&amp;src=1&amp;NaPm=tracking" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+      </label>
+      <div class="btn-row">
+        <button class="btn line" type="button" id="urlPaste">📋 붙여넣기</button>
+        <button class="btn" type="button" id="urlClean">깔끔하게 정리</button>
+      </div>
+      <div class="btn-row hidden" id="urlCopyRow">
+        <button class="btn" type="button" id="urlCopy">결과 복사</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="urlResultCard">
+      <h3>정리 결과 <span class="badge ok" id="urlSavedBadge"></span></h3>
+      <div class="list" id="urlList"></div>
+    </div>
+  </section>
+
+  <!-- ③ PDF ↔ 이미지 -->
+  <section class="panel" id="panel-pdf" role="tabpanel" aria-labelledby="tab-pdf">
+    <div class="panel-head">
+      <h2>📄 PDF ↔ 이미지</h2>
+      <p>사진 여러 장을 PDF 한 장으로 묶거나, 받은 PDF를 페이지별 사진으로 꺼내요.</p>
+    </div>
+
+    <div class="card">
+      <div class="seg" id="pdfMode" role="group" aria-label="변환 방향">
+        <button type="button" data-mode="img2pdf" class="is-on">이미지 → PDF</button>
+        <button type="button" data-mode="pdf2img">PDF → 이미지</button>
+      </div>
+
+      <!-- 이미지 → PDF -->
+      <div id="pdfImg2Pdf">
+        <label class="drop is-mini" for="pdfImages" style="margin-top:12px">
+          <input type="file" id="pdfImages" accept="image/*" multiple>
+          <span class="ico" aria-hidden="true">🖼️</span>
+          <strong>사진 여러 장 선택</strong>
+          <span>고른 순서대로 PDF 페이지가 돼요</span>
+        </label>
+        <label class="field">
+          <span class="lbl">용지</span>
+          <select id="pdfPageSize">
+            <option value="fit" selected>사진에 딱 맞게 (여백 없음)</option>
+            <option value="a4">A4 세로 (사진은 가운데 정렬)</option>
+          </select>
+        </label>
+        <div class="list" id="pdfImageList"></div>
+        <button class="btn block" type="button" id="pdfMakePdf" disabled style="margin-top:12px">PDF 만들기</button>
+        <p class="hint" id="pdfImgHint">사진을 고르면 순서를 바꿀 수 있어요.</p>
+      </div>
+
+      <!-- PDF → 이미지 -->
+      <div id="pdfPdf2Img" class="hidden">
+        <label class="drop is-mini" for="pdfFile" style="margin-top:12px">
+          <input type="file" id="pdfFile" accept="application/pdf,.pdf">
+          <span class="ico" aria-hidden="true">📄</span>
+          <strong>PDF 파일 선택</strong>
+          <span>페이지마다 사진으로 꺼내 드려요</span>
+        </label>
+        <div class="row-2">
+          <label class="field">
+            <span class="lbl">화질</span>
+            <select id="pdfQuality">
+              <option value="1.5">보통 (1.5배)</option>
+              <option value="2" selected>선명 (2배)</option>
+              <option value="3">아주 선명 (3배 · 느림)</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="lbl">저장 형식</span>
+            <select id="pdfOutFormat">
+              <option value="png" selected>PNG</option>
+              <option value="jpg">JPG</option>
+            </select>
+          </label>
+        </div>
+        <div class="preview-grid" id="pdfPageGrid"></div>
+        <button class="btn block hidden" type="button" id="pdfSaveAll" style="margin-top:12px">전체 저장</button>
+        <p class="hint" id="pdfHint">PDF는 내 폰에서만 열려요. 서버로 보내지 않아요.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 이미지 압축 · 포맷 변환 -->
+  <section class="panel" id="panel-compress" role="tabpanel" aria-labelledby="tab-compress">
+    <div class="panel-head">
+      <h2>🗜️ 이미지 압축 · 포맷 변환</h2>
+      <p>여러 장을 한 번에 가볍게 줄이고 JPG·PNG·WebP로 바꿔요. 얼마나 줄었는지 바로 보여 드려요.</p>
+    </div>
+
+    <div class="card">
+      <label class="drop" for="cmpFiles">
+        <input type="file" id="cmpFiles" accept="image/*" multiple>
+        <span class="ico" aria-hidden="true">🗜️</span>
+        <strong>사진 여러 장 선택</strong>
+        <span>한 번에 최대 20장까지</span>
+      </label>
+
+      <div class="row-2" style="margin-top:12px">
+        <label class="field" style="margin-top:0">
+          <span class="lbl">최대 너비</span>
+          <select id="cmpMaxWidth">
+            <option value="0">원본 그대로</option>
+            <option value="1920" selected>1920px</option>
+            <option value="1280">1280px</option>
+            <option value="800">800px</option>
+          </select>
+        </label>
+        <label class="field" style="margin-top:0">
+          <span class="lbl">출력 포맷</span>
+          <select id="cmpFormat">
+            <option value="image/jpeg" selected>JPG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp">WebP</option>
+          </select>
+        </label>
+      </div>
+      <div class="slider-row">
+        <span>품질</span>
+        <input type="range" id="cmpQuality" min="10" max="100" value="72" step="1" aria-label="품질">
+        <output id="cmpQualityOut" for="cmpQuality">72%</output>
+      </div>
+      <button class="btn block" type="button" id="cmpRun" disabled>압축 시작</button>
+      <p class="hint" id="cmpHint">PNG는 품질 대신 색 손실 없이 저장돼요(용량은 줄지 않을 수 있어요).</p>
+    </div>
+
+    <div class="card hidden" id="cmpResultCard">
+      <h3>결과 <span class="badge ok" id="cmpTotalBadge"></span></h3>
+      <div class="list" id="cmpList"></div>
+      <button class="btn block" type="button" id="cmpSaveAll" style="margin-top:12px">전체 저장</button>
+    </div>
+  </section>
+
+  <!-- ⑤ QR -->
+  <section class="panel" id="panel-qr" role="tabpanel" aria-labelledby="tab-qr">
+    <div class="panel-head">
+      <h2>📱 만료 없는 QR 생성기</h2>
+      <p>링크·글·와이파이를 QR로 만들어요. 내 폰에서 그려서 저장하니 기간 제한도, 서버도 없어요.</p>
+    </div>
+
+    <div class="card">
+      <div class="seg" id="qrMode" role="group" aria-label="QR 종류">
+        <button type="button" data-mode="url" class="is-on">링크</button>
+        <button type="button" data-mode="text">글</button>
+        <button type="button" data-mode="wifi">와이파이</button>
+      </div>
+
+      <div id="qrUrlBox">
+        <label class="field">
+          <span class="lbl">주소</span>
+          <input type="url" id="qrUrl" placeholder="https://" autocapitalize="off" spellcheck="false" inputmode="url">
+        </label>
+      </div>
+
+      <div id="qrTextBox" class="hidden">
+        <label class="field">
+          <span class="lbl">내용</span>
+          <textarea id="qrText" placeholder="전화번호, 계좌번호, 안내 문구 등" spellcheck="false"></textarea>
+        </label>
+      </div>
+
+      <div id="qrWifiBox" class="hidden">
+        <label class="field">
+          <span class="lbl">와이파이 이름 (SSID)</span>
+          <input type="text" id="qrSsid" autocapitalize="off" spellcheck="false">
+        </label>
+        <label class="field">
+          <span class="lbl">비밀번호</span>
+          <input type="text" id="qrPass" autocapitalize="off" spellcheck="false">
+        </label>
+        <label class="field">
+          <span class="lbl">보안 방식</span>
+          <select id="qrSec">
+            <option value="WPA" selected>WPA / WPA2 / WPA3</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">없음 (개방)</option>
+          </select>
+        </label>
+        <p class="hint">숨김 와이파이는 체크하지 않아도 대부분 연결돼요.</p>
+      </div>
+
+      <div class="row-2 three" style="margin-top:12px">
+        <label class="field" style="margin-top:0">
+          <span class="lbl">크기</span>
+          <select id="qrSize">
+            <option value="512">512px</option>
+            <option value="1024" selected>1024px</option>
+            <option value="2048">2048px</option>
+          </select>
+        </label>
+        <label class="field" style="margin-top:0">
+          <span class="lbl">색</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="color" id="qrFg" value="#111111" aria-label="QR 색">
+            <input type="color" id="qrBg" value="#ffffff" aria-label="배경 색">
+          </div>
+        </label>
+        <label class="field" style="margin-top:0">
+          <span class="lbl">오류 보정</span>
+          <select id="qrEcc">
+            <option value="L">L (가장 작음)</option>
+            <option value="M" selected>M (보통)</option>
+            <option value="Q">Q (강함)</option>
+            <option value="H">H (로고 넣을 때)</option>
+          </select>
+        </label>
+      </div>
+
+      <button class="btn block" type="button" id="qrMake" style="margin-top:12px">QR 만들기</button>
+    </div>
+
+    <div class="card hidden" id="qrResultCard">
+      <h3>만들어진 QR</h3>
+      <div class="stage" style="background:#fff;padding:10px">
+        <canvas id="qrCanvas" style="max-width:280px;cursor:default"></canvas>
+      </div>
+      <p class="hint" id="qrInfo"></p>
+      <div class="btn-row">
+        <button class="btn" type="button" id="qrSave">PNG 저장</button>
+        <button class="btn line" type="button" id="qrCopyImg">이미지 복사</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ SNS 비율 -->
+  <section class="panel" id="panel-resize" role="tabpanel" aria-labelledby="tab-resize">
+    <div class="panel-head">
+      <h2>🖼️ SNS 비율 리사이즈</h2>
+      <p>인스타·스레드·릴스에 맞는 비율로 잘리지 않게 맞춰요. 빈 곳은 흰색·검정·블러로 채워요.</p>
+    </div>
+
+    <div class="card">
+      <label class="drop" for="rsFiles">
+        <input type="file" id="rsFiles" accept="image/*" multiple>
+        <span class="ico" aria-hidden="true">📐</span>
+        <strong>사진 선택</strong>
+        <span>여러 장도 한 번에 같은 비율로</span>
+      </label>
+
+      <label class="field">
+        <span class="lbl">비율</span>
+        <select id="rsRatio">
+          <option value="1:1">1:1 — 인스타·스레드 피드 (1080×1080)</option>
+          <option value="4:5">4:5 — 세로 피드 (1080×1350)</option>
+          <option value="16:9">16:9 — 가로·유튜브 썸네일 (1920×1080)</option>
+          <option value="9:16">9:16 — 릴스·스토리 (1080×1920)</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="lbl">사진 맞추는 방식</span>
+        <select id="rsFill">
+          <option value="white" selected>잘리지 않게 + 흰 배경</option>
+          <option value="black">잘리지 않게 + 검정 배경</option>
+          <option value="blur">잘리지 않게 + 블러 배경</option>
+          <option value="cover">꽉 채우기 (가장자리 잘림)</option>
+        </select>
+      </label>
+
+      <button class="btn block" type="button" id="rsRun" disabled>변환하기</button>
+      <p class="hint" id="rsHint">사진을 고르면 변환 버튼이 켜져요.</p>
+    </div>
+
+    <div class="card hidden" id="rsResultCard">
+      <h3>결과</h3>
+      <div class="preview-grid" id="rsGrid"></div>
+      <button class="btn block" type="button" id="rsSaveAll" style="margin-top:12px">전체 저장</button>
+    </div>
+  </section>
+
+  <!-- ⑦ 워터마크 -->
+  <section class="panel" id="panel-watermark" role="tabpanel" aria-labelledby="tab-watermark">
+    <div class="panel-head">
+      <h2>🏷️ 워터마크 일괄 추가</h2>
+      <p>내 아이디나 문구를 사진 여러 장에 한 번에 찍어요. 위치·투명도·크기를 골라서.</p>
+    </div>
+
+    <div class="card">
+      <label class="drop" for="wmFiles">
+        <input type="file" id="wmFiles" accept="image/*" multiple>
+        <span class="ico" aria-hidden="true">🏷️</span>
+        <strong>사진 여러 장 선택</strong>
+        <span>고른 사진 전부에 같은 워터마크</span>
+      </label>
+
+      <label class="field">
+        <span class="lbl">문구</span>
+        <input type="text" id="wmText" placeholder="@내아이디" autocomplete="off">
+      </label>
+
+      <label class="field">
+        <span class="lbl">위치</span>
+        <select id="wmPos">
+          <option value="br" selected>오른쪽 아래</option>
+          <option value="bl">왼쪽 아래</option>
+          <option value="tr">오른쪽 위</option>
+          <option value="tl">왼쪽 위</option>
+          <option value="center">가운데</option>
+          <option value="tile">대각선 반복 패턴</option>
+        </select>
+      </label>
+
+      <div class="row-2">
+        <label class="field" style="margin-top:0">
+          <span class="lbl">색</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="color" id="wmColor" value="#ffffff" aria-label="글자 색">
+            <button class="btn line small" type="button" id="wmColorSwap">검정으로</button>
+          </div>
+        </label>
+        <label class="field" style="margin-top:0">
+          <span class="lbl">크기</span>
+          <select id="wmSize">
+            <option value="0.03">작게</option>
+            <option value="0.045" selected>보통</option>
+            <option value="0.06">크게</option>
+            <option value="0.09">아주 크게</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="slider-row">
+        <span>투명도</span>
+        <input type="range" id="wmOpacity" min="10" max="100" value="60" step="1" aria-label="투명도">
+        <output id="wmOpacityOut" for="wmOpacity">60%</output>
+      </div>
+
+      <button class="btn block" type="button" id="wmRun" disabled>워터마크 넣기</button>
+      <p class="hint" id="wmHint">사진과 문구를 넣으면 버튼이 켜져요.</p>
+    </div>
+
+    <div class="card hidden" id="wmResultCard">
+      <h3>결과 <span class="badge ok" id="wmCountBadge"></span></h3>
+      <div class="preview-grid" id="wmGrid"></div>
+      <button class="btn block" type="button" id="wmSaveAll" style="margin-top:12px">전체 저장</button>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  샛별 도구함 · 만든 파일은 저장 버튼을 눌러야 내 폰에 남아요<br>
+  홈 화면에 추가하면 앱처럼 열려요 (사파리 → 공유 → 홈 화면에 추가)
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="libs/qrcode.js"></script>
+<script src="libs/jspdf.umd.min.js"></script>
+<script src="libs/pdf.min.js"></script>
+<script src="js/util.js"></script>
+<script src="js/exif.js"></script>
+<script src="js/url.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/compress.js"></script>
+<script src="js/qr.js"></script>
+<script src="js/resize.js"></script>
+<script src="js/watermark.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

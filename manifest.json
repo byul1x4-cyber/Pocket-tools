@@ -1,0 +1,24 @@
+{
+  "name": "샛별 도구함",
+  "short_name": "도구함",
+  "description": "EXIF 삭제·모자이크, URL 추적 제거, PDF↔이미지, 이미지 압축, QR, SNS 비율, 워터마크 — 모두 내 폰 안에서만 처리하는 7가지 도구.",
+  "lang": "ko-KR",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f4fa",
+  "theme_color": "#5b6cff",
+  "icons": [
+    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "EXIF 삭제·모자이크", "url": "./#exif" },
+    { "name": "URL 정리", "url": "./#url" },
+    { "name": "QR 만들기", "url": "./#qr" }
+  ]
+}

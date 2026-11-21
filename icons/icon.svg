@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="샛별 도구함">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#5b6cff"/><stop offset=".55" stop-color="#8a5bff"/><stop offset="1" stop-color="#b95bff"/>
+</linearGradient></defs>
+<rect width="512" height="512" rx="112" fill="url(#g)"/>
+<path d="M186 214v-30a70 70 0 0 1 140 0v30" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"/>
+<rect x="128" y="214" width="256" height="168" rx="24" fill="#fff"/>
+<rect x="226" y="266" width="60" height="46" rx="12" fill="#8c6cff"/>
+<circle cx="378" cy="140" r="20" fill="#fff0b4"/>
+</svg>
