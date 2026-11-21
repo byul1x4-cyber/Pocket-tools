@@ -34,6 +34,10 @@
 
   function draw() {
     const text = payload();
+    // 한글·이모지가 깨지지 않도록 UTF-8 바이트로 기록
+    if (window.qrcode && window.qrcode.stringToBytesFuncs && window.qrcode.stringToBytesFuncs['UTF-8']) {
+      window.qrcode.stringToBytes = window.qrcode.stringToBytesFuncs['UTF-8'];
+    }
     const qr = window.qrcode(0, PT.$('#qrEcc').value || 'M');
     qr.addData(text);
     qr.make();
